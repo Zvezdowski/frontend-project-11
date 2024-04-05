@@ -5,7 +5,10 @@ extends: airbnb-base
 parserOptions:
   ecmaVersion: latest
   sourceType: module
-rules: {}
+rules: 
+	"@html-eslint/indent":
+    - "error"
+    - "tab"
 plugins:
   - "@html-eslint"
 overrides:
