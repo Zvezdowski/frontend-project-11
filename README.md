@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # webpack-package
 
 [![github action status](https://github.com/hexlet-boilerplates/webpack-package/workflows/Node%20CI/badge.svg)](https://github.com/hexlet-boilerplates/webpack-package/actions)
@@ -20,3 +21,7 @@ make develop
 This repository is created and maintained by the team and the community of Hexlet, an educational project. [Read more about Hexlet](https://hexlet.io?utm_source=github&utm_medium=link&utm_campaign=webpack-package).
 
 See most active contributors on [hexlet-friends](https://friends.hexlet.io/).
+=======
+### Hexlet tests and linter status:
+[![Actions Status](https://github.com/seshmonke/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/seshmonke/frontend-project-11/actions)
+>>>>>>> 2061060badd796dfe698b596a40099da4859c77a
