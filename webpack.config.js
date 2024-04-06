@@ -37,4 +37,5 @@ export default {
   output: {
     clean: true,
   },
+  entry: './src/index.js',
 };
