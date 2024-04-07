@@ -4,6 +4,7 @@ root: true
 plugins:
   - jest
   - babel
+  - "@html-eslint"
 
 env:
   node: true
@@ -20,3 +21,12 @@ rules:
   no-console: 0
   import/extensions: 0
   no-underscore-dangle: [2, { "allow": ["__filename", "__dirname"] }]
+  "@html-eslint/indent":
+    - "error"
+    - 2
+
+overrides:
+  - files: "*.html"
+    parser: "@html-eslint/parser"
+    extends:
+      - "plugin:@html-eslint/recommended"
