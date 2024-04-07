@@ -1,4 +1,7 @@
-export default (path, value, previousValue) => {
-  const fish = 'fish';
-  return fish;
+import onChange from 'on-change';
+
+export default (state, elements) => {
+  const watchedState = onChange(state, (path, value, previousValue) => {
+
+  });
 };

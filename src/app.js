@@ -1,6 +1,5 @@
 import * as yup from 'yup';
-import onChange from 'on-change';
-import renderModel from './render.js';
+import renderOnChange from './render.js';
 
 export default () => {
   const initModel = () => {
@@ -24,7 +23,7 @@ export default () => {
 
   const { elements, state } = initModel();
 
-  onChange({ elements, state }, renderModel);
+  renderOnChange(state, elements);
 
   const urlSchema = yup.string().url().required();
 
