@@ -55,6 +55,7 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
-    "npm-check-updates": "^16.6.2"
+    "npm-check-updates": "^16.6.2",
+    "yup": "^1.4.0"
   }
 }
