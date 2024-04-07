@@ -30,7 +30,7 @@ export default () => {
 
   elements.formElement.addEventListener('submit', (e) => {
     e.preventDefault();
-    const { value } = elements.form.elements;
+    const { value } = elements.formElement.elements;
     urlSchema.validate(value)
       .then((url) => {
         state.activeRssList = [...state.activeRssList, url];
