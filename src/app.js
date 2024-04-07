@@ -5,13 +5,17 @@ import renderModel from './render.js';
 export default () => {
   const initModel = () => {
     const state = {
-      inputValue: '',
+      urlInput: {
+        isValid: true,
+        errorText: '',
+      },
       activeRssList: [],
     };
 
     const urlInputElement = document.querySelector('#url-input');
+    const formElement = document.querySelector('form');
 
-    const elements = { urlInputElement };
+    const elements = { urlInputElement, formElement };
 
     return {
       elements, state,
@@ -22,8 +26,19 @@ export default () => {
 
   onChange({ elements, state }, renderModel);
 
-  elements.urlInputElement.addEventListener('input', (e) => {
+  const urlSchema = yup.string().url().required();
+
+  elements.formElement.addEventListener('submit', (e) => {
     e.preventDefault();
-    state.inputValue = e.currentTarget.value;
+    const { value } = elements.form.elements;
+    urlSchema.validate(value)
+      .then((url) => {
+        state.activeRssList = [...state.activeRssList, url];
+      })
+      .catch((error) => {
+        state.urlInput.isValid = false;
+        state.urlInput.errorText = error.message;
+      });
+    console.log(state);
   });
 };
