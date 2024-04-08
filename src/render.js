@@ -10,7 +10,7 @@ export default (state, elements) => {
         } catch (e) {
           return;
         }
-        if (!value) {
+        if (value) {
           elements.urlInputElement.classList.add('is-invalid');
           elements.errorMessageElement.textContent = state.form.error;
         }
