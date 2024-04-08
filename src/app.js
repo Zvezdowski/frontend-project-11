@@ -23,20 +23,20 @@ export default () => {
 
   const { elements, state } = initModel();
 
-  renderOnChange(state, elements);
+  const watchedState = renderOnChange(state, elements);
 
   const urlSchema = yup.string().url().required();
 
   elements.formElement.addEventListener('submit', (e) => {
     e.preventDefault();
-    const { value } = elements.formElement.elements;
+    const { value } = elements.formElement.elements.url;
     urlSchema.validate(value)
       .then((url) => {
-        state.activeRssList = [...state.activeRssList, url];
+        watchedState.activeRssList = [...state.activeRssList, url];
       })
       .catch((error) => {
-        state.form.status = 'failed';
-        state.form.error = error.message;
+        watchedState.form.state = 'failed';
+        watchedState.form.error = error.message;
       });
     console.log(state);
   });
