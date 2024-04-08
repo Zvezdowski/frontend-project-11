@@ -2,6 +2,7 @@ import * as yup from 'yup';
 import renderOnChange from './render.js';
 
 export default () => {
+  console.log('exe');
   const initModel = () => {
     const initialState = {
       form: {
