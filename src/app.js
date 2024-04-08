@@ -2,7 +2,6 @@ import * as yup from 'yup';
 import renderOnChange from './render.js';
 
 export default () => {
-  console.log('exe');
   const initModel = () => {
     const initialState = {
       form: {
@@ -48,6 +47,6 @@ export default () => {
         state.form.state = 'failed';
         state.form.error = error.message;
       });
-    console.log('diagnosis', state.form.state);
+    console.log(state);
   });
 };
