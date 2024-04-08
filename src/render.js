@@ -6,7 +6,15 @@ export default (state, elements) => {
     const changedProp = _.last(path.split('.'));
     switch (changedProp) {
       case 'error':
-        elements.formElement.elements.url.classList.toggle('is-invalid');
+//        if (elements.urlInputElement.classList.contains('is-invalid')) {
+//          elements.urlInputElement.classList.remove('is-invalid');
+//        }
+        try {
+          elements.urlInputElement.classList.remove('is-invalid');
+        } catch (e) {
+          return;
+        }
+        elements.urlInputElement.classList.add('is-invalid');
         elements.errorMessageElement.textContent = state.form.error;
         break;
       case 'state':
