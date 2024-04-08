@@ -4,9 +4,9 @@ import renderOnChange from './render.js';
 export default () => {
   const initModel = () => {
     const state = {
-      urlInput: {
-        isValid: true,
-        errorText: '',
+      form: {
+        state: 'filling',
+        error: null,
       },
       activeRssList: [],
     };
@@ -35,8 +35,8 @@ export default () => {
         state.activeRssList = [...state.activeRssList, url];
       })
       .catch((error) => {
-        state.urlInput.isValid = false;
-        state.urlInput.errorText = error.message;
+        state.form.status = 'failed';
+        state.form.error = error.message;
       });
     console.log(state);
   });
