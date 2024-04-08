@@ -26,7 +26,7 @@ export default () => {
 
   const state = renderOnChange(initialState, elements);
 
-  const urlSchema = yup.string().url().required();
+  const urlSchema = yup.string().url().required().notOneOf(state.rssList);
 
   elements.formElement.addEventListener('submit', (e) => {
     e.preventDefault();

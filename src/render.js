@@ -3,23 +3,21 @@ import _ from 'lodash';
 
 export default (state, elements) => {
   const watchedState = onChange(state, (path, value, previousValue) => {
-    const changedProp = _.last(path.split('.'));
-    switch (changedProp) {
-      case 'error':
-//        if (elements.urlInputElement.classList.contains('is-invalid')) {
-//          elements.urlInputElement.classList.remove('is-invalid');
-//        }
+    switch (path) {
+      case 'state.form.error':
         try {
           elements.urlInputElement.classList.remove('is-invalid');
         } catch (e) {
           return;
         }
-        elements.urlInputElement.classList.add('is-invalid');
-        elements.errorMessageElement.textContent = state.form.error;
+        if (!value) {
+          elements.urlInputElement.classList.add('is-invalid');
+          elements.errorMessageElement.textContent = state.form.error;
+        }
         break;
-      case 'state':
+      case 'state.form.state':
         break;
-      case 'rssList':
+      case 'state.rssList':
         break;
       default:
         throw new Error(`Unknown path: ${path}`);
