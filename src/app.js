@@ -13,7 +13,7 @@ export default () => {
 
     const urlInputElement = document.querySelector('#url-input');
     const formElement = document.querySelector('form');
-    const errorMessageElement = document.querySelector('[<p class="feedback m-0 position-absolute small text-danger"></p>]');
+    const errorMessageElement = document.querySelector('.feedback.m-0.position-absolute.small.text-danger');
 
     const elements = { urlInputElement, formElement, errorMessageElement };
 
