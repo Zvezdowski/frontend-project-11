@@ -3,7 +3,7 @@ import renderOnChange from './render.js';
 
 export default () => {
   const initModel = () => {
-    const state = {
+    const initialState = {
       form: {
         state: 'filling',
         error: null,
@@ -17,13 +17,13 @@ export default () => {
     const elements = { urlInputElement, formElement };
 
     return {
-      elements, state,
+      elements, initialState,
     };
   };
 
-  const { elements, state } = initModel();
+  const { elements, initialState } = initModel();
 
-  const watchedState = renderOnChange(state, elements);
+  const state = renderOnChange(initialState, elements);
 
   const urlSchema = yup.string().url().required();
 
