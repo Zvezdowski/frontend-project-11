@@ -26,13 +26,18 @@ export default () => {
 
   const state = renderOnChange(initialState, elements);
 
-  const urlSchema = yup.string().url().required().notOneOf(state.rssList);
+  const validate = (url, links) => {
+    const schema = yup.string().url().required().notOneOf(links);
+    return schema.validate(url).then(() => {}).catch((error) => console.error(error));
+  };
 
   elements.formElement.addEventListener('submit', (e) => {
     e.preventDefault();
     const { value } = elements.formElement.elements.url;
-    urlSchema.validate(value)
+    validate(value, state.rssList)
       .then((url) => {
+        state.form.state = 'sending';
+        state.form.error = null;
         state.rssList = [...state.rssList, url];
       })
       .catch((error) => {
