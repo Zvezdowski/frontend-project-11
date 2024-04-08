@@ -17,6 +17,8 @@ const renderForm = (formState, elements) => {
 
   switch (formState) {
     case 'sending':
+      elements.urlInputElement.value = '';
+      elements.urlInputElement.focus();
       break;
     case 'failed':
       elements.urlInputElement.classList.add('is-invalid');
