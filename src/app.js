@@ -42,12 +42,12 @@ export default () => {
         state.form.state = 'sending';
         state.form.error = null;
         state.rssList = [...state.rssList, url];
+        elements.formElement.elements.url.value = '';
       })
       .catch((error) => {
         state.form.state = 'failed';
         state.form.error = error.message;
       });
-    elements.formElement.elements.url.value = '';
     console.log(state);
   });
 };
