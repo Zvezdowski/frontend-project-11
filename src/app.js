@@ -48,5 +48,6 @@ export default () => {
         state.form.error = error.message;
       });
     elements.formElement.elements.url.value = '';
+    console.log(state);
   });
 };
