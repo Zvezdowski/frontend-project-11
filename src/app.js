@@ -47,6 +47,6 @@ export default () => {
         state.form.state = 'failed';
         state.form.error = error.message;
       });
-    console.log(state);
+    elements.formElement.elements.url.value = '';
   });
 };
