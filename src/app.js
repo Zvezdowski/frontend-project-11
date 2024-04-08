@@ -8,7 +8,7 @@ export default () => {
         state: 'filling',
         error: null,
       },
-      activeRssList: [],
+      rssList: [],
     };
 
     const urlInputElement = document.querySelector('#url-input');
@@ -32,7 +32,7 @@ export default () => {
     const { value } = elements.formElement.elements.url;
     urlSchema.validate(value)
       .then((url) => {
-        state.activeRssList = [...state.activeRssList, url];
+        state.rssList = [...state.rssList, url];
       })
       .catch((error) => {
         state.form.state = 'failed';

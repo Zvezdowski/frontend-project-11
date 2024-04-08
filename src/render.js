@@ -8,6 +8,10 @@ export default (state, elements) => {
       case 'error':
         elements.formElement.elements.url.classlist.toggle('is-invalid');
         break;
+      case 'state':
+        break;
+      case 'rssList':
+        break;
       default:
         throw new Error(`Unknown path: ${path}`);
     }
