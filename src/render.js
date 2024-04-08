@@ -6,6 +6,7 @@ export default (state, elements) => {
     const changedProp = _.last(path.split('.'));
     switch (changedProp) {
       case 'error':
+        console.log(elements);
         elements.formElement.elements.url.classlist.toggle('is-invalid');
         break;
       case 'state':
