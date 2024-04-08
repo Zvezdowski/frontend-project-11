@@ -27,8 +27,11 @@ export default () => {
   const state = renderOnChange(initialState, elements);
 
   const validate = (url, links) => {
-    const schema = yup.string().url().required().notOneOf(links);
-    return schema.validate(url).then(() => {}).catch((error) => console.error(error));
+    const schema = yup.string()
+      .url()
+      .required()
+      .notOneOf(links);
+    return schema.validate(url);
   };
 
   elements.formElement.addEventListener('submit', (e) => {
