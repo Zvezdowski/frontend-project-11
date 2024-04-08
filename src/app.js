@@ -32,11 +32,11 @@ export default () => {
     const { value } = elements.formElement.elements.url;
     urlSchema.validate(value)
       .then((url) => {
-        watchedState.activeRssList = [...state.activeRssList, url];
+        state.activeRssList = [...state.activeRssList, url];
       })
       .catch((error) => {
-        watchedState.form.state = 'failed';
-        watchedState.form.error = error.message;
+        state.form.state = 'failed';
+        state.form.error = error.message;
       });
     console.log(state);
   });
