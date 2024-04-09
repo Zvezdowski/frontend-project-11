@@ -1,14 +1,14 @@
 import onChange from 'on-change';
 
-const renderError = (value, state, elements) => {
+const renderError = (value, { state, elements }, i18nInstance) => {
   if (value) {
-    elements.errorMessageElement.textContent = state.form.error;
+    elements.errorMessageElement.textContent = i18nInstance.t(state.form.errorType);
     return;
   }
   elements.errorMessageElement.textContent = '';
 };
 
-const renderForm = (formState, elements) => {
+const renderForm = (formState, { elements }) => {
   try {
     elements.urlInputElement.classList.remove('is-invalid');
   } catch (e) {
@@ -28,12 +28,12 @@ const renderForm = (formState, elements) => {
   }
 };
 
-export default (state, elements) => {
+export default (state, elements, i18nInstance) => {
   const watchedState = onChange(state, (path, value) => {
     console.log(path);
     switch (path) {
-      case 'form.error':
-        renderError(value, state, elements);
+      case 'form.errorType':
+        renderError(value, { state, elements }, i18nInstance);
         break;
       case 'form.state':
         renderForm(state.form.state, elements);

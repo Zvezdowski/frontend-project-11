@@ -38,4 +38,5 @@ export default {
     clean: true,
   },
   entry: './src/index.js',
+  devServer: { host: '0.0.0.0', port: 8080 },
 };

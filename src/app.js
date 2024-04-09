@@ -1,12 +1,21 @@
+import i18n from 'i18next';
 import * as yup from 'yup';
 import renderOnChange from './render.js';
+import resources from './locales/index.js';
 
 export default () => {
+  const i18nInstance = i18n.createInstance();
+  i18nInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  });
+
   const initModel = () => {
     const initialState = {
       form: {
         state: 'filling',
-        error: null,
+        errorType: null,
       },
       rssList: [],
     };
@@ -24,7 +33,14 @@ export default () => {
 
   const { elements, initialState } = initModel();
 
-  const state = renderOnChange(initialState, elements);
+  const state = renderOnChange(initialState, elements, i18nInstance);
+
+  yup.setLocale({
+    string: {
+      required: i18nInstance.t('required'),
+      notOneOf: i18nInstance.t('notOneOf'),
+    },
+  });
 
   const validate = (url, links) => {
     const schema = yup.string()
@@ -40,12 +56,12 @@ export default () => {
     validate(value, state.rssList)
       .then((url) => {
         state.form.state = 'sending';
-        state.form.error = null;
+        state.form.errorType = null;
         state.rssList = [...state.rssList, url];
       })
       .catch((error) => {
         state.form.state = 'failed';
-        state.form.error = error.message;
+        state.form.errorType = error.type;
       });
     console.log(state);
   });
