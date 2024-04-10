@@ -38,7 +38,9 @@ export default (state, elements, i18nInstance) => {
       case 'form.state':
         renderForm(state.form.state, elements);
         break;
-      case 'rssList':
+      case 'links':
+        break;
+      case 'feeds':
         break;
       default:
         throw new Error(`Unknown path: ${path}`);

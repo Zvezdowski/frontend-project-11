@@ -1,3 +1,4 @@
+import axios from 'axios';
 import i18n from 'i18next';
 import * as yup from 'yup';
 import renderOnChange from './render.js';
@@ -17,7 +18,9 @@ export default () => {
         state: 'filling',
         errorType: null,
       },
-      rssList: [],
+      links: [],
+      feeds: [],
+      posts: [],
     };
 
     const urlInputElement = document.querySelector('#url-input');
@@ -54,13 +57,23 @@ export default () => {
   elements.formElement.addEventListener('submit', (e) => {
     e.preventDefault();
     const { value } = elements.formElement.elements.url;
-    validate(value, state.rssList)
+    validate(value, state.links)
       .then((url) => {
         state.form.state = 'sending';
         state.form.errorType = null;
-        state.rssList = [...state.rssList, url];
+        state.links = [...state.links, url];
+        const urlObject = new URL(url);
+        state.feeds = [...state.feeds, { name: urlObject.hostname, id: state.feeds.length + 1 }];
+        axios.get(url)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((error) => {
+        console.dir(error);
         state.form.state = 'failed';
         state.form.errorType = error.type;
       });
