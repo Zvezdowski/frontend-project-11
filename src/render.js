@@ -23,6 +23,8 @@ const renderForm = (formState, elements) => {
     case 'failed':
       elements.urlInputElement.classList.add('is-invalid');
       break;
+    case 'finished':
+      break;
     default:
       throw new Error(`Unknown form state: ${formState}`);
   }

@@ -4,6 +4,14 @@ import * as yup from 'yup';
 import renderOnChange from './render.js';
 import resources from './locales/index.js';
 
+const parseXmlFromString = (xmlString) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlString, 'text/xml');
+  return doc;
+};
+
+const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`;
+
 export default () => {
   const i18nInstance = i18n.createInstance();
   i18nInstance.init({
@@ -59,14 +67,16 @@ export default () => {
     const { value } = elements.formElement.elements.url;
     validate(value, state.links)
       .then((url) => {
+        const urlObject = new URL(url);
         state.form.state = 'sending';
         state.form.errorType = null;
         state.links = [...state.links, url];
-        const urlObject = new URL(url);
         state.feeds = [...state.feeds, { name: urlObject.hostname, id: state.feeds.length + 1 }];
-        axios.get(url)
+        axios(normalizeUrl(url))
           .then((response) => {
-            console.log(response);
+            state.form.state = 'finished';
+            const doc = parseXmlFromString(response.data.contents);
+            console.log(doc);
           })
           .catch((error) => {
             console.log(error);
