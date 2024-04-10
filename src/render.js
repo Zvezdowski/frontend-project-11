@@ -8,7 +8,7 @@ const renderError = (value, { state, elements }, i18nInstance) => {
   elements.errorMessageElement.textContent = '';
 };
 
-const renderForm = (formState, { elements }) => {
+const renderForm = (formState, elements) => {
   try {
     elements.urlInputElement.classList.remove('is-invalid');
   } catch (e) {
@@ -30,7 +30,7 @@ const renderForm = (formState, { elements }) => {
 
 export default (state, elements, i18nInstance) => {
   const watchedState = onChange(state, (path, value) => {
-    console.log(path);
+    console.log('Render path:', path);
     switch (path) {
       case 'form.errorType':
         renderError(value, { state, elements }, i18nInstance);

@@ -22,7 +22,7 @@ export default () => {
 
     const urlInputElement = document.querySelector('#url-input');
     const formElement = document.querySelector('form');
-    const errorMessageElement = document.querySelector('.feedback.m-0.position-absolute.small.text-danger');
+    const errorMessageElement = formElement.nextElementSibling.nextElementSibling;
 
     const elements = { urlInputElement, formElement, errorMessageElement };
 
@@ -37,6 +37,7 @@ export default () => {
 
   yup.setLocale({
     string: {
+      url: i18nInstance.t('url'),
       required: i18nInstance.t('required'),
       notOneOf: i18nInstance.t('notOneOf'),
     },

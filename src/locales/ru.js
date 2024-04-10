@@ -1,6 +1,7 @@
 export default {
   translation: {
-    required: 'Ссылка должна быть валидным URL',
+    url: 'Ссылка должна быть валидным URL',
+    required: 'Не должно быть пустым',
     notOneOf: 'RSS уже существует',
   },
 };
