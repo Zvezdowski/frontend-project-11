@@ -20,31 +20,17 @@ export default () => {
     resources,
   });
 
-  const initModel = () => {
-    const initialState = {
-      form: {
-        state: 'filling',
-        errorType: null,
-      },
-      links: [],
-      feeds: [],
-      posts: [],
-    };
+  const initModel = () => ({
+    form: {
+      state: 'filling',
+      errorType: null,
+    },
+    links: [],
+    feeds: [],
+    posts: [],
+  });
 
-    const urlInputElement = document.querySelector('#url-input');
-    const formElement = document.querySelector('form');
-    const errorMessageElement = formElement.nextElementSibling.nextElementSibling;
-
-    const elements = { urlInputElement, formElement, errorMessageElement };
-
-    return {
-      elements, initialState,
-    };
-  };
-
-  const { elements, initialState } = initModel();
-
-  const state = renderOnChange(initialState, elements, i18nInstance);
+  const state = renderOnChange(initModel(), i18nInstance);
 
   yup.setLocale({
     string: {
@@ -62,9 +48,10 @@ export default () => {
     return schema.validate(url);
   };
 
-  elements.formElement.addEventListener('submit', (e) => {
+  const formElement = document.querySelector('form');
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
-    const { value } = elements.formElement.elements.url;
+    const { value } = formElement.elements.url;
     validate(value, state.links)
       .then((url) => {
         const urlObject = new URL(url);
@@ -76,6 +63,7 @@ export default () => {
           .then((response) => {
             state.form.state = 'finished';
             const doc = parseXmlFromString(response.data.contents);
+            // console.log(doc.querySelectorAll('item')[0]);
             console.log(doc);
           })
           .catch((error) => {
