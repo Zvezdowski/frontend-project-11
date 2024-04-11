@@ -10,7 +10,7 @@ const parseXmlFromString = (xmlString) => {
   return doc;
 };
 
-const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`;
+const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
 const createFeedState = (rssElement, { feeds }) => {
   const title = rssElement.querySelector('channel > title').textContent;
