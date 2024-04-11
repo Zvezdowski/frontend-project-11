@@ -12,6 +12,31 @@ const parseXmlFromString = (xmlString) => {
 
 const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`;
 
+const createFeedState = (rssElement, { feeds }) => {
+  const title = rssElement.querySelector('channel > title').textContent;
+  const description = rssElement.querySelector('channel > description').textContent;
+  const feedId = feeds.length + 1;
+  return { title, description, feedId };
+};
+
+const createPostStates = (rssElement, { feeds }) => {
+  const itemElements = Array.from(rssElement.querySelectorAll('item'));
+
+  let postStates = [];
+  itemElements.forEach((itemElement) => {
+    const href = itemElement.querySelector('link').textContent;
+    const title = itemElement.querySelector('title').textContent;
+    const postId = postStates.length + 1;
+    const feedId = feeds.length;
+    const postState = {
+      href, title, postId, feedId,
+    };
+    postStates = [...postStates, postState];
+  });
+
+  return postStates;
+};
+
 export default () => {
   const i18nInstance = i18n.createInstance();
   i18nInstance.init({
@@ -31,6 +56,8 @@ export default () => {
   });
 
   const state = renderOnChange(initModel(), i18nInstance);
+
+  console.log('initial state: ', state);
 
   yup.setLocale({
     string: {
@@ -54,17 +81,16 @@ export default () => {
     const { value } = formElement.elements.url;
     validate(value, state.links)
       .then((url) => {
-        const urlObject = new URL(url);
         state.form.state = 'sending';
         state.form.errorType = null;
         state.links = [...state.links, url];
-        state.feeds = [...state.feeds, { name: urlObject.hostname, id: state.feeds.length + 1 }];
         axios(normalizeUrl(url))
           .then((response) => {
             state.form.state = 'finished';
             const doc = parseXmlFromString(response.data.contents);
-            // console.log(doc.querySelectorAll('item')[0]);
-            console.log(doc);
+            console.log('doc', doc);
+            state.feeds = [...state.feeds, createFeedState(doc, state)];
+            state.posts = [...createPostStates(doc, state), ...state.posts];
           })
           .catch((error) => {
             console.log(error);
