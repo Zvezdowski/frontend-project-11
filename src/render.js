@@ -2,7 +2,7 @@ import onChange from 'on-change';
 
 const feedsContainerElement = document.querySelector('div.feeds');
 const postsContainerElement = document.querySelector('div.posts');
-const errorMessageElement = document.querySelector('p.text-danger');
+const messageElement = document.querySelector('p.text-danger');
 const urlInputElement = document.querySelector('#url-input');
 
 const createFeedElement = ({ title, description }) => {
@@ -57,15 +57,32 @@ const renderPosts = (posts) => {
   postsContainerElement.append(postCardElement);
 };
 
-const renderError = (value, { form }, i18nInstance) => {
-  if (value) {
-    errorMessageElement.textContent = i18nInstance.t(form.errorType);
+const renderErrorMessage = (value, { form }, i18nInstance) => {
+  try {
+    messageElement.classList.remove('text-success');
+    messageElement.classList.add('text-danger');
+  } catch (e) {
     return;
   }
-  errorMessageElement.textContent = '';
+
+  if (value) {
+    messageElement.textContent = i18nInstance.t(form.errorType);
+    return;
+  }
+  messageElement.textContent = '';
 };
 
-const renderForm = (formState) => {
+const renderSuccessMessage = (i18nInstance) => {
+  try {
+    messageElement.classList.add('text-success');
+    messageElement.classList.remove('text-danger');
+  } catch (e) {
+    return;
+  }
+  messageElement.textContent = i18nInstance.t('successMessage');
+};
+
+const renderForm = (formState, i18nInstance) => {
   try {
     urlInputElement.classList.remove('is-invalid');
   } catch (e) {
@@ -81,6 +98,7 @@ const renderForm = (formState) => {
       urlInputElement.classList.add('is-invalid');
       break;
     case 'finished':
+      renderSuccessMessage(i18nInstance);
       break;
     default:
       throw new Error(`Unknown form state: ${formState}`);
@@ -92,10 +110,10 @@ export default (state, i18nInstance) => {
     console.log('Render path:', path);
     switch (path) {
       case 'form.errorType':
-        renderError(value, state, i18nInstance);
+        renderErrorMessage(value, state, i18nInstance);
         break;
       case 'form.state':
-        renderForm(state.form.state);
+        renderForm(state.form.state, i18nInstance);
         break;
       case 'links':
         break;

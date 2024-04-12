@@ -1,6 +1,7 @@
 import axios from 'axios';
 import i18n from 'i18next';
 import * as yup from 'yup';
+import _ from 'lodash';
 import renderOnChange from './render.js';
 import resources from './locales/index.js';
 
@@ -12,14 +13,14 @@ const parseXmlFromString = (xmlString) => {
 
 const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
-const createFeedState = (rssElement, { feeds }) => {
+const createFeedState = (rssElement, { feeds }, href) => {
   const title = rssElement.querySelector('channel > title').textContent;
   const description = rssElement.querySelector('channel > description').textContent;
   const feedId = feeds.length + 1;
-  return { title, description, feedId };
+  return { title, description, feedId, href };
 };
 
-const createPostStates = (rssElement, { feeds }) => {
+const createPostStates = (rssElement, { feeds }, currentFeedId = undefined) => {
   const itemElements = Array.from(rssElement.querySelectorAll('item'));
 
   let postStates = [];
@@ -27,7 +28,7 @@ const createPostStates = (rssElement, { feeds }) => {
     const href = itemElement.querySelector('link').textContent;
     const title = itemElement.querySelector('title').textContent;
     const postId = postStates.length + 1;
-    const feedId = feeds.length;
+    const feedId = currentFeedId || feeds.length;
     const postState = {
       href, title, postId, feedId,
     };
@@ -35,6 +36,22 @@ const createPostStates = (rssElement, { feeds }) => {
   });
 
   return postStates;
+};
+
+const initFeedUpdater = ({ href, feedId }, state) => { // feedState, state
+  setTimeout(() => {
+    axios(href).then(({ data }) => {
+      const doc = parseXmlFromString(data.contents);
+      const freshPosts = createPostStates(doc, {}, feedId);
+      const existingPosts = state.posts.filter((post) => post.feedId === feedId);
+      const newPosts = _.differenceBy(freshPosts, existingPosts, 'href');
+      if (newPosts.length) {
+        console.log('New posts: ', newPosts);
+        state.posts = [...newPosts, ...state.posts];
+      }
+      initFeedUpdater({ href, feedId }, state);
+    });
+  }, 5000);
 };
 
 export default () => {
@@ -84,13 +101,17 @@ export default () => {
         state.form.state = 'sending';
         state.form.errorType = null;
         state.links = [...state.links, url];
-        axios(normalizeUrl(url))
-          .then((response) => {
+        const normalizedUrl = normalizeUrl(url);
+        axios(normalizedUrl)
+          .then(({ data }) => {
+            console.log(data);
             state.form.state = 'finished';
-            const doc = parseXmlFromString(response.data.contents);
+            const doc = parseXmlFromString(data.contents);
             console.log('doc', doc);
-            state.feeds = [...state.feeds, createFeedState(doc, state)];
+            const feedState = createFeedState(doc, state, normalizedUrl);
+            state.feeds = [...state.feeds, feedState];
             state.posts = [...createPostStates(doc, state), ...state.posts];
+            initFeedUpdater(feedState, state);
           })
           .catch((error) => {
             console.log(error);

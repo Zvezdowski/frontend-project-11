@@ -3,5 +3,6 @@ export default {
     url: 'Ссылка должна быть валидным URL',
     required: 'Не должно быть пустым',
     notOneOf: 'RSS уже существует',
+    successMessage: 'RSS успешно загружен',
   },
 };
