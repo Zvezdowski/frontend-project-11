@@ -4,6 +4,7 @@ const feedsContainerElement = document.querySelector('div.feeds');
 const postsContainerElement = document.querySelector('div.posts');
 const messageElement = document.querySelector('p.text-danger');
 const urlInputElement = document.querySelector('#url-input');
+const submitButtonElement = document.querySelector('form button');
 
 const createFeedElement = ({ title, description }) => {
   const feedElement = document.createElement('li');
@@ -91,13 +92,19 @@ const renderForm = (formState, i18nInstance) => {
 
   switch (formState) {
     case 'sending':
-      urlInputElement.value = '';
-      urlInputElement.focus();
+      urlInputElement.disabled = true;
+      submitButtonElement.disabled = true;
       break;
     case 'failed':
+      urlInputElement.disabled = false;
+      submitButtonElement.disabled = false;
       urlInputElement.classList.add('is-invalid');
       break;
     case 'finished':
+      urlInputElement.disabled = false;
+      submitButtonElement.disabled = false;
+      urlInputElement.value = '';
+      urlInputElement.focus();
       renderSuccessMessage(i18nInstance);
       break;
     default:

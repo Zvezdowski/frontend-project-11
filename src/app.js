@@ -14,10 +14,14 @@ const parseXmlFromString = (xmlString) => {
 const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
 const createFeedState = (rssElement, { feeds }, href) => {
+  console.log('Отладка', rssElement);
   const title = rssElement.querySelector('channel > title').textContent;
-  const description = rssElement.querySelector('channel > description').textContent;
+  const descriptionEl = rssElement.querySelector('channel > description');
+  const description = descriptionEl ? descriptionEl.textContent : '';
   const feedId = feeds.length + 1;
-  return { title, description, feedId, href };
+  return {
+    title, description, feedId, href,
+  };
 };
 
 const createPostStates = (rssElement, { feeds }, currentFeedId = undefined) => {
@@ -39,7 +43,6 @@ const createPostStates = (rssElement, { feeds }, currentFeedId = undefined) => {
 };
 
 const initFeedUpdater = ({ href, feedId }, state) => { // feedState, state
-  console.log(state);
   setTimeout(() => {
     axios(href).then(({ data }) => {
       const doc = parseXmlFromString(data.contents);
@@ -53,6 +56,7 @@ const initFeedUpdater = ({ href, feedId }, state) => { // feedState, state
       initFeedUpdater({ href, feedId }, state);
     }).catch((e) => {
       console.log(e);
+      initFeedUpdater({ href, feedId }, state);
     });
   }, 5000);
 };
@@ -103,18 +107,21 @@ export default () => {
       .then((url) => {
         state.form.state = 'sending';
         state.form.errorType = null;
-        state.links = [...state.links, url];
         const normalizedUrl = normalizeUrl(url);
         axios(normalizedUrl)
           .then(({ data }) => {
-            console.log(data);
-            state.form.state = 'finished';
-            const doc = parseXmlFromString(data.contents);
-            console.log('doc', doc);
-            const feedState = createFeedState(doc, state, normalizedUrl);
-            state.feeds = [...state.feeds, feedState];
-            state.posts = [...createPostStates(doc, state), ...state.posts];
-            initFeedUpdater(feedState, state);
+            const rssDoc = parseXmlFromString(data.contents).querySelector('rss');
+            console.log('doc', rssDoc);
+            if (rssDoc) {
+              state.form.state = 'finished';
+              state.links = [...state.links, url];
+              const feedState = createFeedState(rssDoc, state, normalizedUrl);
+              state.feeds = [...state.feeds, feedState];
+              state.posts = [...createPostStates(rssDoc, state), ...state.posts];
+              initFeedUpdater(feedState, state);
+            } else {
+              throw new Error('rss not found');
+            }
           })
           .catch((error) => {
             state.form.state = 'failed';
@@ -123,7 +130,7 @@ export default () => {
           });
       })
       .catch((error) => {
-        console.dir(error);
+        console.log(error);
         state.form.state = 'failed';
         state.form.errorType = error.type;
       });
