@@ -39,6 +39,7 @@ const createPostStates = (rssElement, { feeds }, currentFeedId = undefined) => {
 };
 
 const initFeedUpdater = ({ href, feedId }, state) => { // feedState, state
+  console.log(state);
   setTimeout(() => {
     axios(href).then(({ data }) => {
       const doc = parseXmlFromString(data.contents);
@@ -50,6 +51,8 @@ const initFeedUpdater = ({ href, feedId }, state) => { // feedState, state
         state.posts = [...newPosts, ...state.posts];
       }
       initFeedUpdater({ href, feedId }, state);
+    }).catch((e) => {
+      console.log(e);
     });
   }, 5000);
 };
@@ -114,6 +117,8 @@ export default () => {
             initFeedUpdater(feedState, state);
           })
           .catch((error) => {
+            state.form.state = 'failed';
+            state.form.errorType = 'notFound';
             console.log(error);
           });
       })

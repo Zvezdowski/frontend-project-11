@@ -4,5 +4,6 @@ export default {
     required: 'Не должно быть пустым',
     notOneOf: 'RSS уже существует',
     successMessage: 'RSS успешно загружен',
+    notFound: 'Ресурс не найден, попробуйте снова',
   },
 };
