@@ -130,6 +130,8 @@ export default (state, i18nInstance) => {
       case 'posts':
         renderPosts(state.posts);
         break;
+      case 'monitoring':
+        break;
       default:
         throw new Error(`Unknown path: ${path}`);
     }

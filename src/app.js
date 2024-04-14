@@ -37,36 +37,9 @@ const createPostStates = (rssElement, feedId) => {
   return postStates;
 };
 
-/*
-const launchMonitoring = (state) => new Promise((resolve, reject) => {
-  setTimeout(() => {
-    const { feeds, posts } = state;
-    feeds.forEach((feed) => {
-      const {
-        title, description, feedId, href,
-      } = feed;
-      axios(href)
-        .then((response) => {
-          const { data } = response;
-          const rssDoc = parseXmlFromString(data.contents);
-          if (!rssDoc) throw new Error('rss not found');
-          const freshPosts = createPostStates(rssDoc, feedId);
-          const existingPosts = posts.filter((post) => post.feedId === feedId);
-          const newPosts = _.differenceBy(freshPosts, existingPosts, 'href');
-          console.log('newPosts', newPosts);
-          resolve(newPosts);
-          launchMonitoring({ ...state, posts: [...newPosts, ...existingPosts] })
-            .then(resolve)
-            .catch(reject);
-        })
-        .catch((e) => {
-          throw e;
-        });
-    });
-  }, 5000, state);
-});
-*/
-const launchMonitoring = (state) => new Promise((resolve, reject) => {
+const launchMonitoring = (originalState) => {
+  console.log('Внимание! Работа радаров.');
+  const state = originalState;
   console.log('Мониторинг запущен');
   setTimeout(() => {
     const { feeds, posts } = state;
@@ -82,18 +55,13 @@ const launchMonitoring = (state) => new Promise((resolve, reject) => {
         const unpublishedPosts = _.differenceBy(freshPosts, existingPosts, 'href');
         return unpublishedPosts;
       });
-      resolve(allUnpublishedPosts);
-      launchMonitoring({ ...state, posts: [...allUnpublishedPosts, posts] })
-        .then(resolve)
-        .catch(reject);
-    }).catch((e) => {
-      launchMonitoring(state)
-        .then(resolve)
-        .catch(reject);
-      reject(e);
+      console.log('All unpublished posts', allUnpublishedPosts);
+      if (allUnpublishedPosts.length) state.posts = [...allUnpublishedPosts, ...state.posts];
+    }).finally(() => {
+      launchMonitoring(state);
     });
   }, 5000);
-});
+};
 
 export default () => {
   const i18nInstance = i18n.createInstance();
@@ -111,6 +79,7 @@ export default () => {
     links: [],
     feeds: [],
     posts: [],
+    monitoring: false,
   });
 
   const state = renderOnChange(initModel(), i18nInstance);
@@ -159,18 +128,17 @@ export default () => {
           .catch(() => {
             state.form.state = 'failed';
             state.form.errorType = 'notFound';
+          })
+          .finally(() => {
+            if (!state.monitoring) {
+              state.monitoring = true;
+              launchMonitoring(state);
+            }
           });
       })
       .catch((error) => {
         state.form.state = 'failed';
         state.form.errorType = error.type;
-      });
-    launchMonitoring(state)
-      .then((allUnpublishedPosts) => {
-        state.posts = [...allUnpublishedPosts, ...state.posts];
-      })
-      .catch((updateError) => {
-        console.log(updateError);
       });
   });
 };
