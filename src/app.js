@@ -22,6 +22,16 @@ const createFeedState = (rssElement, feedId, href) => {
   };
 };
 
+const assignPostId = (originalState) => {
+  const state = originalState;
+  state.posts.forEach((originalPost, index, array) => {
+    const post = originalPost;
+    if (!Object.hasOwn(post, 'postId')) {
+      post.postId = array.length - index;
+    }
+  });
+};
+
 const createPostStates = (rssElement, feedId) => {
   const itemElements = Array.from(rssElement.querySelectorAll('item'));
   let postStates = [];
@@ -33,7 +43,6 @@ const createPostStates = (rssElement, feedId) => {
     };
     postStates = [...postStates, postState];
   });
-
   return postStates;
 };
 
@@ -56,7 +65,10 @@ const launchMonitoring = (originalState) => {
         return unpublishedPosts;
       });
       console.log('All unpublished posts', allUnpublishedPosts);
-      if (allUnpublishedPosts.length) state.posts = [...allUnpublishedPosts, ...state.posts];
+      if (allUnpublishedPosts.length) {
+        state.posts = [...allUnpublishedPosts, ...state.posts];
+        assignPostId(state);
+      }
     }).finally(() => {
       launchMonitoring(state);
     });
@@ -124,6 +136,7 @@ export default () => {
             const feedState = createFeedState(rssDoc, feedId, normalizedUrl);
             state.feeds = [...state.feeds, feedState];
             state.posts = [...createPostStates(rssDoc, feedId), ...state.posts];
+            assignPostId(state);
           })
           .catch(() => {
             state.form.state = 'failed';
