@@ -39,7 +39,8 @@ const createPostElement = ({ href, postId, title }) => {
   return postElement;
 };
 
-const renderPosts = (posts) => {
+const renderPosts = (state) => {
+  const { posts } = state;
   postsContainerElement.innerHTML = '';
 
   const postCardElement = document.createElement('div');
@@ -112,6 +113,29 @@ const renderForm = (formState, i18nInstance) => {
   }
 };
 
+const renderReadPosts = (state) => {
+  const { readPostsId } = state;
+  readPostsId.forEach((postId) => {
+    const postEl = document.querySelector(`a[data-id="${postId}"]`);
+    postEl.classList.remove('fw-bold');
+    postEl.classList.add('fw-normal');
+  });
+};
+
+const renderModal = (state) => {
+  const modalTitleEl = document.querySelector('.modal-title');
+  const modalBodyEl = document.querySelector('.modal-body');
+  const { modalPostId, posts } = state;
+  if (modalPostId) {
+    const currentPost = posts.find((post) => post.postId === modalPostId);
+    modalTitleEl.textContent = currentPost.title;
+    modalBodyEl.textContent = currentPost.description;
+    return;
+  }
+  modalTitleEl.textContent = '';
+  modalBodyEl.textContent = '';
+};
+
 export default (state, i18nInstance) => {
   const watchedState = onChange(state, (path, value) => {
     console.log('Render path:', path);
@@ -128,9 +152,16 @@ export default (state, i18nInstance) => {
         renderFeeds(state.feeds);
         break;
       case 'posts':
-        renderPosts(state.posts);
+        renderPosts(state);
+        renderReadPosts(state);
         break;
       case 'monitoring':
+        break;
+      case 'readPostsId':
+        renderReadPosts(state);
+        break;
+      case 'modalPostId':
+        renderModal(state);
         break;
       default:
         throw new Error(`Unknown path: ${path}`);

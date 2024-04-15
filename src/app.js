@@ -38,8 +38,10 @@ const createPostStates = (rssElement, feedId) => {
   itemElements.forEach((itemElement) => {
     const href = itemElement.querySelector('link').textContent;
     const title = itemElement.querySelector('title').textContent;
+    const descriptionEl = itemElement.querySelector('description');
+    const description = descriptionEl ? descriptionEl.textContent : title;
     const postState = {
-      href, title, feedId,
+      href, title, feedId, description,
     };
     postStates = [...postStates, postState];
   });
@@ -92,6 +94,8 @@ export default () => {
     feeds: [],
     posts: [],
     monitoring: false,
+    readPostsId: [],
+    modalPostId: undefined,
   });
 
   const state = renderOnChange(initModel(), i18nInstance);
@@ -153,5 +157,14 @@ export default () => {
         state.form.state = 'failed';
         state.form.errorType = error.type;
       });
+  });
+  const modal = document.querySelector('.modal');
+  modal.addEventListener('show.bs.modal', (e) => {
+    const button = e.relatedTarget;
+    state.modalPostId = parseInt(button.dataset.id, 10);
+  });
+
+  modal.addEventListener('hide.bs.modal', () => {
+    state.modalPostId = undefined;
   });
 };
