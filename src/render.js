@@ -125,15 +125,18 @@ const renderReadPosts = (state) => {
 const renderModal = (state) => {
   const modalTitleEl = document.querySelector('.modal-title');
   const modalBodyEl = document.querySelector('.modal-body');
+  const linkButtonEl = document.querySelector('.modal-footer a');
   const { modalPostId, posts } = state;
   if (modalPostId) {
-    const currentPost = posts.find((post) => post.postId === modalPostId);
-    modalTitleEl.textContent = currentPost.title;
-    modalBodyEl.textContent = currentPost.description;
+    const { title, description, href } = posts.find((post) => post.postId === modalPostId);
+    modalTitleEl.textContent = title;
+    modalBodyEl.textContent = description;
+    linkButtonEl.setAttribute('href', href);
     return;
   }
   modalTitleEl.textContent = '';
   modalBodyEl.textContent = '';
+  linkButtonEl.setAttribute('href', '#');
 };
 
 export default (state, i18nInstance) => {

@@ -160,8 +160,13 @@ export default () => {
   });
   const modal = document.querySelector('.modal');
   modal.addEventListener('show.bs.modal', (e) => {
-    const button = e.relatedTarget;
-    state.modalPostId = parseInt(button.dataset.id, 10);
+    const { id } = e.relatedTarget.dataset;
+
+    state.modalPostId = parseInt(id, 10);
+
+    const uniqueReadPostsId = new Set(state.readPostsId);
+    uniqueReadPostsId.add(id);
+    state.readPostsId = Array.from(uniqueReadPostsId);
   });
 
   modal.addEventListener('hide.bs.modal', () => {
