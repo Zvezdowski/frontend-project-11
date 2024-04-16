@@ -8,14 +8,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hexlet-boilerplates/webpack-package.git"
+    "url": "git+https://github.com:seshmonke/frontend-project-11.git"
   },
-  "author": "Kirill Mokevnin",
+  "author": "Alexandr Zvezdov",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/hexlet-boilerplates/webpack-package/issues"
-  },
-  "homepage": "https://github.com/hexlet-boilerplates/webpack-package#readme",
+  "homepage": "https://https://github.com/seshmonke/frontend-project-11/blob/main/README.md",
   "jest": {
     "verbose": true,
     "testEnvironmentOptions": {
@@ -30,6 +27,8 @@
     "@babel/preset-env": "^7.20.2",
     "@html-eslint/eslint-plugin": "^0.24.1",
     "@html-eslint/parser": "^0.24.1",
+    "@playwright/test": "^1.43.1",
+    "@types/node": "^20.12.7",
     "babel-jest": "^29.3.1",
     "babel-loader": "^9.1.2",
     "css-loader": "^6.11.0",

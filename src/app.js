@@ -1,4 +1,4 @@
-import axios, { all } from 'axios';
+import axios from 'axios';
 import i18n from 'i18next';
 import * as yup from 'yup';
 import _ from 'lodash';
@@ -130,10 +130,15 @@ export default () => {
         const normalizedUrl = normalizeUrl(url);
         axios(normalizedUrl)
           .then((response) => {
+            console.log(response);
             const { data } = response;
             const rssDoc = parseXmlFromString(data.contents).querySelector('rss');
             console.log('doc', rssDoc);
-            if (!rssDoc) throw new Error('rss not found');
+            if (!rssDoc) {
+              state.form.state = 'failed';
+              state.form.errorType = 'notFound';
+              return;
+            }
             state.form.state = 'finished';
             state.links = [...state.links, url];
             const feedId = state.feeds.length + 1;
@@ -144,7 +149,7 @@ export default () => {
           })
           .catch(() => {
             state.form.state = 'failed';
-            state.form.errorType = 'notFound';
+            state.form.errorType = 'networkError';
           })
           .finally(() => {
             if (!state.monitoring) {

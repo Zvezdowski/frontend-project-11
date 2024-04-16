@@ -5,5 +5,6 @@ export default {
     notOneOf: 'RSS уже существует',
     successMessage: 'RSS успешно загружен',
     notFound: 'Ресурс не содержит валидный RSS',
+    networkError: 'Ошибка сети',
   },
 };
