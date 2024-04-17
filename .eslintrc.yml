@@ -25,8 +25,12 @@ rules:
     - "error"
     - 2
 
+
 overrides:
   - files: "*.html"
     parser: "@html-eslint/parser"
     extends:
       - "plugin:@html-eslint/recommended"
+  - files: "*.html"
+    rules:
+      max-len: off

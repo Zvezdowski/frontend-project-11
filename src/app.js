@@ -54,7 +54,7 @@ const launchMonitoring = (originalState) => {
   console.log('Мониторинг запущен');
   setTimeout(() => {
     const { feeds, posts } = state;
-    const promises = feeds.map((feed) => axios(feed.href));
+    const promises = feeds.map((feed) => axios(feed.href, { timeout: 5000 }));
     Promise.all(promises).then((responses) => {
       const allUnpublishedPosts = responses.flatMap((response) => {
         const { data, request } = response;
@@ -128,7 +128,7 @@ export default () => {
         state.form.state = 'sending';
         state.form.errorType = null;
         const normalizedUrl = normalizeUrl(url);
-        axios(normalizedUrl)
+        axios(normalizedUrl, { timeout: 15000 })
           .then((response) => {
             console.log(response);
             const { data } = response;
@@ -152,7 +152,7 @@ export default () => {
             state.form.errorType = 'networkError';
           })
           .finally(() => {
-            if (!state.monitoring) {
+            if (!state.monitoring && state.links.length) {
               state.monitoring = true;
               launchMonitoring(state);
             }
