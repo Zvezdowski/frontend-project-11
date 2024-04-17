@@ -141,7 +141,6 @@ const renderModal = (state) => {
 
 export default (state, i18nInstance) => {
   const watchedState = onChange(state, (path, value) => {
-    console.log('Render path:', path);
     switch (path) {
       case 'form.errorType':
         renderErrorMessage(value, state, i18nInstance);

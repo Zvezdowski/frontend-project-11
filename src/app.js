@@ -49,9 +49,7 @@ const createPostStates = (rssElement, feedId) => {
 };
 
 const launchMonitoring = (originalState) => {
-  console.log('Внимание! Работа радаров.');
   const state = originalState;
-  console.log('Мониторинг запущен');
   setTimeout(() => {
     const { feeds, posts } = state;
     const promises = feeds.map((feed) => axios(feed.href, { timeout: 5000 }));
@@ -66,7 +64,6 @@ const launchMonitoring = (originalState) => {
         const unpublishedPosts = _.differenceBy(freshPosts, existingPosts, 'href');
         return unpublishedPosts;
       });
-      console.log('All unpublished posts', allUnpublishedPosts);
       if (allUnpublishedPosts.length) {
         state.posts = [...allUnpublishedPosts, ...state.posts];
         assignPostId(state);
@@ -100,8 +97,6 @@ export default () => {
 
   const state = renderOnChange(initModel(), i18nInstance);
 
-  console.log('initial state: ', state);
-
   yup.setLocale({
     string: {
       url: i18nInstance.t('url'),
@@ -120,7 +115,6 @@ export default () => {
 
   const formElement = document.querySelector('form');
   formElement.addEventListener('submit', (e) => {
-    console.log(state);
     e.preventDefault();
     const { value } = formElement.elements.url;
     validate(value, state.links)
@@ -130,10 +124,8 @@ export default () => {
         const normalizedUrl = normalizeUrl(url);
         axios(normalizedUrl, { timeout: 15000 })
           .then((response) => {
-            console.log(response);
             const { data } = response;
             const rssDoc = parseXmlFromString(data.contents).querySelector('rss');
-            console.log('doc', rssDoc);
             if (!rssDoc) {
               state.form.state = 'failed';
               state.form.errorType = 'notFound';
