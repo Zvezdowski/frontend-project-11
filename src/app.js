@@ -95,7 +95,7 @@ export default () => {
     modalPostId: undefined,
   });
 
-  const state = renderOnChange(initModel(), i18nInstance);
+  const view = renderOnChange(initModel(), i18nInstance);
 
   yup.setLocale({
     string: {
@@ -117,56 +117,56 @@ export default () => {
   formElement.addEventListener('submit', (e) => {
     e.preventDefault();
     const { value } = formElement.elements.url;
-    validate(value, state.links)
+    validate(value, view.links)
       .then((url) => {
-        state.form.state = 'sending';
-        state.form.errorType = null;
+        view.form.state = 'sending';
+        view.form.errorType = null;
         const normalizedUrl = normalizeUrl(url);
         axios(normalizedUrl, { timeout: 15000 })
           .then((response) => {
             const { data } = response;
             const rssDoc = parseXmlFromString(data.contents).querySelector('rss');
             if (!rssDoc) {
-              state.form.state = 'failed';
-              state.form.errorType = 'notFound';
+              view.form.state = 'failed';
+              view.form.errorType = 'notFound';
               return;
             }
-            state.form.state = 'finished';
-            state.links = [...state.links, url];
-            const feedId = state.feeds.length + 1;
+            view.form.state = 'finished';
+            view.links = [...view.links, url];
+            const feedId = view.feeds.length + 1;
             const feedState = createFeedState(rssDoc, feedId, normalizedUrl);
-            state.feeds = [...state.feeds, feedState];
-            state.posts = [...createPostStates(rssDoc, feedId), ...state.posts];
-            assignPostId(state);
+            view.feeds = [...view.feeds, feedState];
+            view.posts = [...createPostStates(rssDoc, feedId), ...view.posts];
+            assignPostId(view);
           })
           .catch(() => {
-            state.form.state = 'failed';
-            state.form.errorType = 'networkError';
+            view.form.state = 'failed';
+            view.form.errorType = 'networkError';
           })
           .finally(() => {
-            if (!state.monitoring && state.links.length) {
-              state.monitoring = true;
-              launchMonitoring(state);
+            if (!view.monitoring && view.links.length) {
+              view.monitoring = true;
+              launchMonitoring(view);
             }
           });
       })
       .catch((error) => {
-        state.form.state = 'failed';
-        state.form.errorType = error.type;
+        view.form.state = 'failed';
+        view.form.errorType = error.type;
       });
   });
   const modal = document.querySelector('.modal');
   modal.addEventListener('show.bs.modal', (e) => {
     const { id } = e.relatedTarget.dataset;
 
-    state.modalPostId = parseInt(id, 10);
+    view.modalPostId = parseInt(id, 10);
 
-    const uniqueReadPostsId = new Set(state.readPostsId);
+    const uniqueReadPostsId = new Set(view.readPostsId);
     uniqueReadPostsId.add(id);
-    state.readPostsId = Array.from(uniqueReadPostsId);
+    view.readPostsId = Array.from(uniqueReadPostsId);
   });
 
   modal.addEventListener('hide.bs.modal', () => {
-    state.modalPostId = undefined;
+    view.modalPostId = undefined;
   });
 };
