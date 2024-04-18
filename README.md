@@ -1,4 +1,4 @@
-# [RSS Агрегатор](https://frontend-project-11-g66e7uano-seshmonkes-projects.vercel.app)
+# [RSS Aggregator](https://frontend-project-11-g66e7uano-seshmonkes-projects.vercel.app)
 
 [![Actions Status](https://github.com/seshmonke/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/seshmonke/frontend-project-11/actions)
 [![Actions Status](https://github.com/seshmonke/frontend-project-11/actions/workflows/nodejs.yml/badge.svg)](https://github.com/seshmonke/frontend-project-11/actions)
