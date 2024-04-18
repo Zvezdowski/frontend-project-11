@@ -62,8 +62,8 @@ const launchMonitoring = (state) => {
           const unpublishedPosts = _.differenceBy(rssData.posts, existingPosts, 'href');
           return unpublishedPosts;
         });
-        console.log(state);
         if (allUnpublishedPosts.length) {
+          console.log(state);
           state.posts = [...allUnpublishedPosts, ...state.posts];
         }
       } catch (error) {

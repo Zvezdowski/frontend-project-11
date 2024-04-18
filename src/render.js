@@ -54,7 +54,7 @@ const renderPosts = (state) => {
 };
 
 const renderErrorMessage = (value, { form }, i18nInstance) => {
-  const messageElement = document.querySelector('p.text-danger');
+  const messageElement = document.querySelector('p.feedback');
 
   try {
     messageElement.classList.remove('text-success');
@@ -71,7 +71,7 @@ const renderErrorMessage = (value, { form }, i18nInstance) => {
 };
 
 const renderSuccessMessage = (i18nInstance) => {
-  const messageElement = document.querySelector('p.text-danger');
+  const messageElement = document.querySelector('p.feedback');
 
   try {
     messageElement.classList.add('text-success');
@@ -141,6 +141,7 @@ const renderModal = (state) => {
 };
 
 export default (state, i18nInstance, path, value) => {
+  console.log('render path: ', path, 'value: <', value, '>');
   switch (path) {
     case 'form.errorType':
       renderErrorMessage(value, state, i18nInstance);
