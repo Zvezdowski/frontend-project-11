@@ -15,4 +15,4 @@ https://frontend-project-11-g66e7uano-seshmonkes-projects.vercel.app/
 - `make install`
 - `make build`
 - `make develop`
-- `Open in browser: http://localhost:8080/`
+- Open in browser: http://localhost:8080/
