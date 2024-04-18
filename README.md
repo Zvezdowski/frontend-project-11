@@ -11,7 +11,7 @@ https://frontend-project-11-g66e7uano-seshmonkes-projects.vercel.app/
 `node.js v20.7.0`
 
 # How to use:
-`git clone https://github.com/seshmonke/frontend-project-11`
-`make install`
-`make build`
-`make develop`
+- `git clone https://github.com/seshmonke/frontend-project-11`
+- `make install`
+- `make build`
+- `make develop`
