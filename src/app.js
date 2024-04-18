@@ -104,7 +104,7 @@ export default () => {
 
     yup.setLocale({
       string: {
-        url: i18nInstance.t('url'),
+        url: t('url'),
         required: t('required'),
         notOneOf: t('notOneOf'),
       },
