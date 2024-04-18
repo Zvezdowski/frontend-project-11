@@ -63,7 +63,6 @@ const launchMonitoring = (state) => {
           return unpublishedPosts;
         });
         if (allUnpublishedPosts.length) {
-          console.log(state);
           state.posts = [...allUnpublishedPosts, ...state.posts];
         }
       } catch (error) {

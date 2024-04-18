@@ -141,7 +141,6 @@ const renderModal = (state) => {
 };
 
 export default (state, i18nInstance, path, value) => {
-  console.log('render path: ', path, 'value: <', value, '>');
   switch (path) {
     case 'form.errorType':
       renderErrorMessage(value, state, i18nInstance);
