@@ -1,11 +1,3 @@
-import onChange from 'on-change';
-
-const feedsContainerElement = document.querySelector('div.feeds');
-const postsContainerElement = document.querySelector('div.posts');
-const messageElement = document.querySelector('p.text-danger');
-const urlInputElement = document.querySelector('#url-input');
-const submitButtonElement = document.querySelector('form button');
-
 const createFeedElement = ({ title, description }) => {
   const feedElement = document.createElement('li');
   feedElement.classList.add('list-group-item', 'border-0', 'border-end-0');
@@ -14,6 +6,7 @@ const createFeedElement = ({ title, description }) => {
 };
 
 const renderFeeds = (feeds) => {
+  const feedsContainerElement = document.querySelector('div.feeds');
   feedsContainerElement.innerHTML = '';
 
   const feedCardElement = document.createElement('div');
@@ -40,6 +33,7 @@ const createPostElement = ({ href, postId, title }) => {
 };
 
 const renderPosts = (state) => {
+  const postsContainerElement = document.querySelector('div.posts');
   const { posts } = state;
   postsContainerElement.innerHTML = '';
 
@@ -60,6 +54,8 @@ const renderPosts = (state) => {
 };
 
 const renderErrorMessage = (value, { form }, i18nInstance) => {
+  const messageElement = document.querySelector('p.text-danger');
+
   try {
     messageElement.classList.remove('text-success');
     messageElement.classList.add('text-danger');
@@ -75,6 +71,8 @@ const renderErrorMessage = (value, { form }, i18nInstance) => {
 };
 
 const renderSuccessMessage = (i18nInstance) => {
+  const messageElement = document.querySelector('p.text-danger');
+
   try {
     messageElement.classList.add('text-success');
     messageElement.classList.remove('text-danger');
@@ -85,6 +83,9 @@ const renderSuccessMessage = (i18nInstance) => {
 };
 
 const renderForm = (formState, i18nInstance) => {
+  const urlInputElement = document.querySelector('#url-input');
+  const submitButtonElement = document.querySelector('form button');
+
   try {
     urlInputElement.classList.remove('is-invalid');
   } catch (e) {
@@ -139,35 +140,32 @@ const renderModal = (state) => {
   linkButtonEl.setAttribute('href', '#');
 };
 
-export default (state, i18nInstance) => {
-  const watchedState = onChange(state, (path, value) => {
-    switch (path) {
-      case 'form.errorType':
-        renderErrorMessage(value, state, i18nInstance);
-        break;
-      case 'form.state':
-        renderForm(state.form.state, i18nInstance);
-        break;
-      case 'links':
-        break;
-      case 'feeds':
-        renderFeeds(state.feeds);
-        break;
-      case 'posts':
-        renderPosts(state);
-        renderReadPosts(state);
-        break;
-      case 'monitoring':
-        break;
-      case 'readPostsId':
-        renderReadPosts(state);
-        break;
-      case 'modalPostId':
-        renderModal(state);
-        break;
-      default:
-        throw new Error(`Unknown path: ${path}`);
-    }
-  });
-  return watchedState;
+export default (state, i18nInstance, path, value) => {
+  switch (path) {
+    case 'form.errorType':
+      renderErrorMessage(value, state, i18nInstance);
+      break;
+    case 'form.state':
+      renderForm(state.form.state, i18nInstance);
+      break;
+    case 'links':
+      break;
+    case 'feeds':
+      renderFeeds(state.feeds);
+      break;
+    case 'posts':
+      renderPosts(state);
+      renderReadPosts(state);
+      break;
+    case 'monitoring':
+      break;
+    case 'readPostsId':
+      renderReadPosts(state);
+      break;
+    case 'modalPostId':
+      renderModal(state);
+      break;
+    default:
+      throw new Error(`Unknown path: ${path}`);
+  }
 };

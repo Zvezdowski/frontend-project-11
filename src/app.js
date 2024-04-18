@@ -2,34 +2,21 @@ import axios from 'axios';
 import i18n from 'i18next';
 import * as yup from 'yup';
 import _ from 'lodash';
-import renderOnChange from './render.js';
+import { v4 as uuidv4 } from 'uuid';
+import onChange from 'on-change';
+import render from './render.js';
 import resources from './locales/index.js';
-
-const parseXmlFromString = (xmlString) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlString, 'text/xml');
-  return doc;
-};
 
 const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
-const createFeedState = (rssElement, feedId, href) => {
+const createFeedState = (rssElement, href, defaultFeedId = undefined) => {
   const title = rssElement.querySelector('channel > title').textContent;
   const descriptionEl = rssElement.querySelector('channel > description');
   const description = descriptionEl ? descriptionEl.textContent : '';
+  const feedId = defaultFeedId || uuidv4();
   return {
     title, description, feedId, href,
   };
-};
-
-const assignPostId = (originalState) => {
-  const state = originalState;
-  state.posts.forEach((originalPost, index, array) => {
-    const post = originalPost;
-    if (!Object.hasOwn(post, 'postId')) {
-      post.postId = array.length - index;
-    }
-  });
 };
 
 const createPostStates = (rssElement, feedId) => {
@@ -40,48 +27,55 @@ const createPostStates = (rssElement, feedId) => {
     const title = itemElement.querySelector('title').textContent;
     const descriptionEl = itemElement.querySelector('description');
     const description = descriptionEl ? descriptionEl.textContent : title;
+    const postId = uuidv4();
     const postState = {
-      href, title, feedId, description,
+      href, title, feedId, description, postId,
     };
     postStates = [...postStates, postState];
   });
   return postStates;
 };
 
-const launchMonitoring = (originalState) => {
-  const state = originalState;
+const parseRss = (xml, href, defaultFeedId = undefined) => {
+  const parser = new DOMParser();
+  const rssDoc = parser.parseFromString(xml, 'text/xml').querySelector('rss');
+  if (!rssDoc) throw new Error('rss not found');
+  const feedState = createFeedState(rssDoc, href, defaultFeedId);
+  const posts = createPostStates(rssDoc, feedState.feedId);
+  const rssData = { feedState, posts };
+  return rssData;
+};
+
+const msToRequest = 5000;
+const launchMonitoring = (state) => {
   setTimeout(() => {
     const { feeds, posts } = state;
-    const promises = feeds.map((feed) => axios(feed.href, { timeout: 5000 }));
+    const msToTimeout = 5000;
+    const promises = feeds.map((feed) => axios.get(feed.href, { timeout: msToTimeout }));
     Promise.all(promises).then((responses) => {
-      const allUnpublishedPosts = responses.flatMap((response) => {
-        const { data, request } = response;
-        const rssDoc = parseXmlFromString(data.contents);
-        if (!rssDoc) throw new Error('rss not found');
-        const { feedId } = feeds.find((feed) => feed.href === request.responseURL);
-        const existingPosts = posts.filter((post) => post.feedId === feedId);
-        const freshPosts = createPostStates(rssDoc, feedId);
-        const unpublishedPosts = _.differenceBy(freshPosts, existingPosts, 'href');
-        return unpublishedPosts;
-      });
-      if (allUnpublishedPosts.length) {
-        state.posts = [...allUnpublishedPosts, ...state.posts];
-        assignPostId(state);
+      try {
+        const allUnpublishedPosts = responses.flatMap((response) => {
+          const { data, request } = response;
+          const { feedId } = feeds.find((feed) => feed.href === request.responseURL);
+          const rssData = parseRss(data.contents, request.responseURL, feedId);
+          const existingPosts = posts.filter((post) => post.feedId === feedId);
+          const unpublishedPosts = _.differenceBy(rssData.posts, existingPosts, 'href');
+          return unpublishedPosts;
+        });
+        console.log(state);
+        if (allUnpublishedPosts.length) {
+          state.posts = [...allUnpublishedPosts, ...state.posts];
+        }
+      } catch (error) {
+        console.log(error);
       }
     }).finally(() => {
       launchMonitoring(state);
     });
-  }, 5000);
+  }, msToRequest);
 };
 
 export default () => {
-  const i18nInstance = i18n.createInstance();
-  i18nInstance.init({
-    lng: 'ru',
-    debug: true,
-    resources,
-  });
-
   const initModel = () => ({
     form: {
       state: 'filling',
@@ -90,83 +84,86 @@ export default () => {
     links: [],
     feeds: [],
     posts: [],
-    monitoring: false,
-    readPostsId: [],
+    readPostsId: new Set(),
     modalPostId: undefined,
   });
 
-  const view = renderOnChange(initModel(), i18nInstance);
+  const i18nInstance = i18n.createInstance();
+  i18nInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  }).then((t) => {
+    const view = initModel();
 
-  yup.setLocale({
-    string: {
-      url: i18nInstance.t('url'),
-      required: i18nInstance.t('required'),
-      notOneOf: i18nInstance.t('notOneOf'),
-    },
-  });
+    const watchedView = onChange(view, (path, value) => {
+      render(view, i18nInstance, path, value);
+    });
 
-  const validate = (url, links) => {
-    const schema = yup.string()
-      .url()
-      .required()
-      .notOneOf(links);
-    return schema.validate(url);
-  };
+    launchMonitoring(watchedView);
 
-  const formElement = document.querySelector('form');
-  formElement.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const { value } = formElement.elements.url;
-    validate(value, view.links)
-      .then((url) => {
-        view.form.state = 'sending';
-        view.form.errorType = null;
-        const normalizedUrl = normalizeUrl(url);
-        axios(normalizedUrl, { timeout: 15000 })
-          .then((response) => {
-            const { data } = response;
-            const rssDoc = parseXmlFromString(data.contents).querySelector('rss');
-            if (!rssDoc) {
-              view.form.state = 'failed';
-              view.form.errorType = 'notFound';
-              return;
-            }
-            view.form.state = 'finished';
-            view.links = [...view.links, url];
-            const feedId = view.feeds.length + 1;
-            const feedState = createFeedState(rssDoc, feedId, normalizedUrl);
-            view.feeds = [...view.feeds, feedState];
-            view.posts = [...createPostStates(rssDoc, feedId), ...view.posts];
-            assignPostId(view);
-          })
-          .catch(() => {
-            view.form.state = 'failed';
-            view.form.errorType = 'networkError';
-          })
-          .finally(() => {
-            if (!view.monitoring && view.links.length) {
-              view.monitoring = true;
-              launchMonitoring(view);
-            }
-          });
-      })
-      .catch((error) => {
-        view.form.state = 'failed';
-        view.form.errorType = error.type;
-      });
-  });
-  const modal = document.querySelector('.modal');
-  modal.addEventListener('show.bs.modal', (e) => {
-    const { id } = e.relatedTarget.dataset;
+    yup.setLocale({
+      string: {
+        url: i18nInstance.t('url'),
+        required: t('required'),
+        notOneOf: t('notOneOf'),
+      },
+    });
 
-    view.modalPostId = parseInt(id, 10);
+    const validate = (url, links) => {
+      const schema = yup.string()
+        .url()
+        .required()
+        .notOneOf(links);
+      return schema.validate(url);
+    };
 
-    const uniqueReadPostsId = new Set(view.readPostsId);
-    uniqueReadPostsId.add(id);
-    view.readPostsId = Array.from(uniqueReadPostsId);
-  });
+    const formElement = document.querySelector('form');
+    formElement.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const { value } = formElement.elements.url;
+      validate(value, view.links)
+        .then((url) => {
+          watchedView.form.state = 'sending';
+          watchedView.form.errorType = null;
+          const normalizedUrl = normalizeUrl(url);
+          const msToTimeout = 15000;
+          axios.get(normalizedUrl, { timeout: msToTimeout })
+            .then(({ data }) => {
+              try {
+                const rssData = parseRss(data.contents, normalizedUrl);
+                watchedView.form.state = 'finished';
+                watchedView.links = [...watchedView.links, url];
+                watchedView.feeds = [...watchedView.feeds, rssData.feedState];
+                watchedView.posts = [...rssData.posts, ...watchedView.posts];
+              } catch (parsingError) {
+                console.log(parsingError);
+                watchedView.form.state = 'failed';
+                watchedView.form.errorType = 'notFound';
+              }
+            })
+            .catch(() => {
+              watchedView.form.state = 'failed';
+              watchedView.form.errorType = 'networkError';
+            });
+        })
+        .catch((error) => {
+          watchedView.form.state = 'failed';
+          watchedView.form.errorType = error.type;
+        });
+    });
 
-  modal.addEventListener('hide.bs.modal', () => {
-    view.modalPostId = undefined;
+    const modal = document.querySelector('.modal');
+    modal.addEventListener('show.bs.modal', (e) => {
+      const { id } = e.relatedTarget.dataset;
+      watchedView.modalPostId = id;
+      watchedView.readPostsId.add(id);
+    });
+
+    modal.addEventListener('hide.bs.modal', () => {
+      watchedView.modalPostId = undefined;
+    });
+  }).catch((i18nError) => {
+    console.log(i18nError);
   });
 };
