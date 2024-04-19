@@ -7,9 +7,11 @@ import onChange from 'on-change';
 import render from './render.js';
 import resources from './locales/index.js';
 
+const msToTimeout = 5000;
+
 const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
 
-const createFeedState = (rssElement, href, defaultFeedId = undefined) => {
+const createFeedState = (rssElement, href, defaultFeedId) => {
   const title = rssElement.querySelector('channel > title').textContent;
   const descriptionEl = rssElement.querySelector('channel > description');
   const description = descriptionEl ? descriptionEl.textContent : '';
@@ -36,42 +38,41 @@ const createPostStates = (rssElement, feedId) => {
   return postStates;
 };
 
-const parseRss = (xml, href, defaultFeedId = undefined) => {
+const parseRss = (xml, href, defaultFeedId) => {
   const parser = new DOMParser();
   const rssDoc = parser.parseFromString(xml, 'text/xml').querySelector('rss');
-  if (!rssDoc) throw new Error('rss not found');
+  if (!rssDoc) throw new Error('notFound');
   const feedState = createFeedState(rssDoc, href, defaultFeedId);
   const posts = createPostStates(rssDoc, feedState.feedId);
   const rssData = { feedState, posts };
   return rssData;
 };
 
-const msToRequest = 5000;
 const launchMonitoring = (state) => {
   setTimeout(() => {
     const { feeds, posts } = state;
-    const msToTimeout = 5000;
-    const promises = feeds.map((feed) => axios.get(feed.href, { timeout: msToTimeout }));
+    const promises = feeds.map((feed) => axios.get(feed.href, { timeout: msToTimeout })
+      .catch((promiseError) => {
+        console.log(promiseError);
+        return null;
+      }));
     Promise.all(promises).then((responses) => {
-      try {
-        const allUnpublishedPosts = responses.flatMap((response) => {
-          const { data, request } = response;
-          const { feedId } = feeds.find((feed) => feed.href === request.responseURL);
-          const rssData = parseRss(data.contents, request.responseURL, feedId);
-          const existingPosts = posts.filter((post) => post.feedId === feedId);
-          const unpublishedPosts = _.differenceBy(rssData.posts, existingPosts, 'href');
-          return unpublishedPosts;
-        });
-        if (allUnpublishedPosts.length) {
-          state.posts = [...allUnpublishedPosts, ...state.posts];
-        }
-      } catch (error) {
-        console.log(error);
+      const allUnpublishedPosts = responses.flatMap((response) => {
+        if (!response) return [];
+        const { data, request } = response;
+        const { feedId } = feeds.find((feed) => feed.href === request.responseURL);
+        const rssData = parseRss(data.contents, request.responseURL, feedId);
+        const existingPosts = posts.filter((post) => post.feedId === feedId);
+        const unpublishedPosts = _.differenceBy(rssData.posts, existingPosts, 'href');
+        return unpublishedPosts;
+      });
+      if (allUnpublishedPosts.length) {
+        state.posts = [...allUnpublishedPosts, ...state.posts];
       }
     }).finally(() => {
       launchMonitoring(state);
     });
-  }, msToRequest);
+  }, msToTimeout);
 };
 
 export default () => {
@@ -126,24 +127,17 @@ export default () => {
           watchedView.form.state = 'sending';
           watchedView.form.errorType = null;
           const normalizedUrl = normalizeUrl(url);
-          const msToTimeout = 15000;
           axios.get(normalizedUrl, { timeout: msToTimeout })
             .then(({ data }) => {
-              try {
-                const rssData = parseRss(data.contents, normalizedUrl);
-                watchedView.form.state = 'finished';
-                watchedView.links = [...watchedView.links, url];
-                watchedView.feeds = [...watchedView.feeds, rssData.feedState];
-                watchedView.posts = [...rssData.posts, ...watchedView.posts];
-              } catch (parsingError) {
-                console.log(parsingError);
-                watchedView.form.state = 'failed';
-                watchedView.form.errorType = 'notFound';
-              }
+              const rssData = parseRss(data.contents, normalizedUrl);
+              watchedView.form.state = 'finished';
+              watchedView.links = [...watchedView.links, url];
+              watchedView.feeds = [...watchedView.feeds, rssData.feedState];
+              watchedView.posts = [...rssData.posts, ...watchedView.posts];
             })
-            .catch(() => {
+            .catch(({ message }) => {
               watchedView.form.state = 'failed';
-              watchedView.form.errorType = 'networkError';
+              watchedView.form.errorType = message === 'notFound' ? 'notFound' : 'networkError';
             });
         })
         .catch((error) => {

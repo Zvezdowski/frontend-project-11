@@ -56,11 +56,9 @@ const renderPosts = (state) => {
 const renderErrorMessage = (value, { form }, i18nInstance) => {
   const messageElement = document.querySelector('p.feedback');
 
-  try {
+  if (messageElement.classList.contains('text-success')) {
     messageElement.classList.remove('text-success');
     messageElement.classList.add('text-danger');
-  } catch (e) {
-    return;
   }
 
   if (value) {
@@ -73,12 +71,11 @@ const renderErrorMessage = (value, { form }, i18nInstance) => {
 const renderSuccessMessage = (i18nInstance) => {
   const messageElement = document.querySelector('p.feedback');
 
-  try {
+  if (messageElement.classList.contains('text-danger')) {
     messageElement.classList.add('text-success');
     messageElement.classList.remove('text-danger');
-  } catch (e) {
-    return;
   }
+
   messageElement.textContent = i18nInstance.t('successMessage');
 };
 
@@ -86,10 +83,8 @@ const renderForm = (formState, i18nInstance) => {
   const urlInputElement = document.querySelector('#url-input');
   const submitButtonElement = document.querySelector('form button');
 
-  try {
+  if (urlInputElement.classList.contains('is-invalid')) {
     urlInputElement.classList.remove('is-invalid');
-  } catch (e) {
-    return;
   }
 
   switch (formState) {
